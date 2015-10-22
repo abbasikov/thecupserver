@@ -32,4 +32,8 @@ public interface DBObjectRelationshipRepository extends CrudRepository<DBObjectR
 	@Query(name="deleteRelationshipByChildUuid", value="delete DBObjectRelationship u where u.pk.cUuid = ?1 and u.pk.relationshipType = ?2")
 	void deleteRelationshipByChildUuid(String childUuid,String relationshipType);
 	
+	@Modifying
+	@Query(name="deleteRelationship", value="delete DBObjectRelationship u where u.pk.pUuid = ?1 and u.pk.cUuid = ?2 and u.pk.relationshipType = ?3")
+	void deleteRelationship(String parentUuid, String childUuid, String relationshipType);
+	
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.macys.domain.Component;
 import com.macys.domain.Lab;
 import com.macys.domain.Release;
 import com.macys.domain.ReleaseCup;
@@ -19,6 +20,7 @@ import com.macys.exceptions.ServiceException;
 import com.macys.utils.Constants;
 import com.macys.utils.JsonUtils;
 import com.macys.utils.ServiceUtils;
+import com.macys.valuesobjects.ComponentVo;
 import com.macys.valuesobjects.IPMTreeVo;
 import com.macys.valuesobjects.LabVo;
 import com.macys.valuesobjects.MatrixVo;
@@ -44,6 +46,8 @@ public class LabService extends BaseService{
 		lab.setIsActivated("true");
 		
 		lab = (Lab)dao.saveBusinessObject(lab);
+		
+		assignComponentsToLab(lab.getUuid(), getAllComponentsCreatedByAdmin(), createdBy);
 		
 		return (LabVo)lab.createDTO();
 		
@@ -80,7 +84,7 @@ public class LabService extends BaseService{
 				
 				//Get Users of lab
 				labVo.users = new ArrayList<UserVo>();
-				List<Relationship> relations =  dao.findChildren(lab.getUuid());
+				List<Relationship> relations =  dao.findChildrenWithRelationshipType(lab.getUuid(),RelationshipTypeEnum.LAB_USER);
 				for (Relationship relationship : relations) {
 					String userUuid =  relationship.getChildUuid();
 					User user = (User)dao.getBusinessObjectByUuid(userUuid);
@@ -170,6 +174,10 @@ public class LabService extends BaseService{
 		dao.deleteBusinessObjectByUuid(uuid);
 	}
 	
+	public void deleteRelationship(String pUuid, String cUuid, String relationshipType) throws ServiceException{
+		dao.deleteRelationShip(pUuid, cUuid, RelationshipTypeEnum.enumFromName(relationshipType));
+	}
+	
 	public ReleaseVo createRelease(String name, String branchCutDate,String branchFreezeDate,String hardLockDate,String branchProductionDate, String mcomDate, String bcomDate,String isActivated) throws ServiceException {
 		ServiceUtils.verifyNotBlank(name, 			"name");
 		ServiceUtils.verifyNotBlank(branchCutDate, 	"branchCutDate");
@@ -225,7 +233,7 @@ public class LabService extends BaseService{
 		return listToReturn;
 	}
 	
-	public ReleaseCupVo createReleaseCup(String releaseUuid, String labUuid, String availableDevDays, String devDays, String regressionDays,String sysComponents) throws ServiceException {
+	public ReleaseCupVo createReleaseCup(String releaseUuid, String labUuid, String availableDevDays, String devDays, String regressionDays,String sysComponents, String createdBy) throws ServiceException {
 		
 		ServiceUtils.verifyNotBlank(releaseUuid, 		"releaseUuid");
 		ServiceUtils.verifyNotBlank(labUuid, 			"labUuid");
@@ -372,6 +380,74 @@ public class LabService extends BaseService{
 		catch(Exception exc){
 			exc.printStackTrace(System.err);
 		}
+	}
+	
+	public ComponentVo createComponent(String name, String description, String createdBy) throws ServiceException{
+		ServiceUtils.verifyNotBlank(name, 		"ComponentName");
+		Component component =  (Component)dao.emptyBusinessObject(BusinessObjectTypeEnum.COMPONENT, name, createdBy);
+		component.setDescription(description);
+		component.setIsChecked("false");
+		dao.saveBusinessObject(component);
+		return (ComponentVo)component.createDTO();
+	}
+	
+	public ComponentVo createComponentByLabUuid(String name, String description,String labUuid, String createdBy) throws ServiceException{
+		ServiceUtils.verifyNotBlank(name, 		"ComponentName");
+		Component component =  (Component)dao.emptyBusinessObject(BusinessObjectTypeEnum.COMPONENT, name, createdBy);
+		component.setDescription(description);
+		component.setIsChecked("false");
+		dao.saveBusinessObject(component);
+		dao.saveRelationship(labUuid, component.getUuid(), RelationshipTypeEnum.LAB_COMPONENT.toString(), createdBy);
+		return (ComponentVo)component.createDTO();
+	}
+	
+	public List<ComponentVo> getAllComponentsCreatedByAdmin() throws ServiceException{
+		List<ComponentVo> listToReturn = new ArrayList<ComponentVo>();
+		List<BusinessObject> businessObjects = dao.findBusinessObjectsByType(BusinessObjectTypeEnum.COMPONENT);
+		if(businessObjects != null){
+			for (BusinessObject businessObject : businessObjects) {
+				Component component = (Component)businessObject;
+				if(component.getCreatedBy().equals("Super Admin"))
+					listToReturn.add((ComponentVo)component.createDTO());
+			}
+		}		
+		return listToReturn;
+	}
+	
+	public void assignComponentsToLab(String labUuid, List<ComponentVo> components, String createdBy){
+		try{
+			if(components != null){
+				for (ComponentVo componentVo : components) {
+					String compUuid = componentVo.uuid;
+					dao.saveRelationship(labUuid,compUuid, RelationshipTypeEnum.LAB_COMPONENT.toString(), createdBy);
+				}
+			}
+		}
+		catch(Exception exc){
+			
+		}
+	}
+	
+	public List<ComponentVo> getAllComponentsByLabUuid(String labUuid) throws ServiceException{
+		List<ComponentVo> listToReturn = new ArrayList<ComponentVo>();
+		List<Relationship> relations =  dao.findChildrenWithRelationshipType(labUuid, RelationshipTypeEnum.LAB_COMPONENT);
+		if(relations != null){
+			for (Relationship relationship : relations) {
+				String compUuid = relationship.getChildUuid();
+				Component component = (Component)dao.getBusinessObjectByUuid(compUuid);
+				if(component != null)
+					listToReturn.add((ComponentVo)component.createDTO());
+			}
+		}
+		
+		List<ComponentVo> allComps = getAllComponentsCreatedByAdmin();
+		for (ComponentVo componentVo : allComps) {
+			if(listToReturn.contains(componentVo) == false){
+				dao.saveRelationship(labUuid, componentVo.uuid, RelationshipTypeEnum.LAB_COMPONENT.toString(), "Super Admin");
+				listToReturn.add(componentVo);
+			}
+		}
+		return listToReturn;
 	}
 	
 }

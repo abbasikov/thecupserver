@@ -12,7 +12,8 @@ public enum BusinessObjectTypeEnum {
 	SYSTEM_COMPONENT("SYSCO","SystemComponent"),
 	RELEASE("RELSE","Release"),
 	RELEASECUP("RELCP","ReleaseCup"),
-	IPM("IPMVO","IPM");
+	IPM("IPMVO","IPM"),
+	COMPONENT("COMPO","Component");
 	
 	String type;
 	String interfaceName;

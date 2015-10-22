@@ -23,12 +23,14 @@ import com.macys.exceptions.ServiceException;
 import com.macys.services.LabService;
 import com.macys.services.UserService;
 import com.macys.utils.Constants;
+import com.macys.valuesobjects.ComponentVo;
 import com.macys.valuesobjects.LabVo;
 import com.macys.valuesobjects.ReleaseCupVo;
 import com.macys.valuesobjects.ReleaseVo;
 import com.macys.valuesobjects.SystemComponentVo;
 import com.macys.valuesobjects.UserVo;
 import com.macys.valuesobjects.containers.BaseContainerVo;
+import com.macys.valuesobjects.containers.ComponentContainerVo;
 import com.macys.valuesobjects.containers.LabContainerVo;
 import com.macys.valuesobjects.containers.ReleaseContainerVo;
 import com.macys.valuesobjects.containers.ReleaseCupContainerVo;
@@ -102,6 +104,36 @@ public class PublicRestController extends BaseRestController{
 		BaseContainerVo baseContainer = new BaseContainerVo();
 		try{
 			labService.deleteBusinessObject(uuid);
+			baseContainer.meta.code = Constants.SUCCESS;
+			return baseContainer;
+		}
+		catch(ServiceException exc){
+			exc.printStackTrace(System.err);
+			baseContainer.meta.code 		= exc.getErrorCodeEnum().getCode();
+			baseContainer.meta.error 		= exc.getErrorCodeEnum().getMessage();
+			baseContainer.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return baseContainer;
+		}
+		catch(Exception exc){
+			exc.printStackTrace(System.err);
+			baseContainer.meta.code 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getCode();
+			baseContainer.meta.error 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getMessage();
+			baseContainer.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return baseContainer;
+		}
+	}
+	
+	@POST
+	@Path("/deleterelationship")
+	@Produces( MediaType.APPLICATION_JSON )
+	@ApiOperation(value = "Delete Relationship",response=BaseContainerVo.class)
+	public BaseContainerVo deleteRelationship(	@ApiParam(value="pUuid",required=true) @FormParam("pUuid") String pUuid,
+												@ApiParam(value="cUuid",required=true) @FormParam("cUuid") String cUuid,
+												@ApiParam(value="relationshipType",required=true) @FormParam("relationshipType") String relationshipType){
+ 
+		BaseContainerVo baseContainer = new BaseContainerVo();
+		try{
+			labService.deleteRelationship(pUuid, cUuid, relationshipType);
 			baseContainer.meta.code = Constants.SUCCESS;
 			return baseContainer;
 		}
@@ -311,11 +343,12 @@ public class PublicRestController extends BaseRestController{
 											@ApiParam(value="availableDevDays",required=true) 	@FormParam("availableDevDays") 	String availableDevDays,
 											@ApiParam(value="devDays",required=true)			@FormParam("devDays")	 		String devDays,
 											@ApiParam(value="regressionDays",required=true) 	@FormParam("regressionDays")	String regressionDays,
-											@ApiParam(value="sysComponents",required=true) 		@FormParam("sysComponents")		String sysComponents){
+											@ApiParam(value="sysComponents",required=true) 		@FormParam("sysComponents")		String sysComponents,
+											@ApiParam(value="createdBy",required=true) 			@FormParam("createdBy")			String createdBy){
  
 		ReleaseCupContainerVo container = new ReleaseCupContainerVo();
 		try{
-			ReleaseCupVo vo 		=  labService.createReleaseCup(releaseUuid,labUuid,availableDevDays,devDays,regressionDays,sysComponents);
+			ReleaseCupVo vo 		=  labService.createReleaseCup(releaseUuid,labUuid,availableDevDays,devDays,regressionDays,sysComponents,createdBy);
 			container.meta.code 	= Constants.SUCCESS;
 			container.data			= vo;
 			return container;
@@ -755,6 +788,125 @@ public class PublicRestController extends BaseRestController{
 			return container;
 		}
 	}
+	
+	@POST
+	@Path("/labs/{labUuid}/components")
+	@Produces( MediaType.APPLICATION_JSON )
+	@ApiOperation(value = "Create Component By Lab Uuid",response=ReleaseCupContainerVo.class)
+	public BaseContainerVo createComponentByLab(@ApiParam(value="name",required=true) @FormParam("name") String name,
+												@ApiParam(value="labUuid",required=true) @PathParam("labUuid") String labUuid,
+												@ApiParam(value="createdBy",required=true) @FormParam("createdBy") String createdBy){
+ 
+		ComponentContainerVo container = new ComponentContainerVo();
+		try{
+			ComponentVo vo 	= labService.createComponentByLabUuid(name, "", labUuid, createdBy);
+			container.meta.code 	= Constants.SUCCESS;
+			container.data 			= vo;
+			return container;
+		}
+		catch(ServiceException exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= exc.getErrorCodeEnum().getCode();
+			container.meta.error 		= exc.getErrorCodeEnum().getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+		catch(Exception exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getCode();
+			container.meta.error 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+	}
+	
+	@GET
+	@Path("/labs/{labUuid}/components")
+	@Produces( MediaType.APPLICATION_JSON )
+	@ApiOperation(value = "Get Component By Lab Uuid",response=ReleaseCupContainerVo.class)
+	public BaseContainerVo getComponentByLab(@ApiParam(value="labUuid",required=true) @PathParam("labUuid") String labUuid){
+ 
+		ComponentContainerVo container = new ComponentContainerVo();
+		try{
+			List<ComponentVo> voList 	= labService.getAllComponentsByLabUuid(labUuid);
+			container.meta.code 		= Constants.SUCCESS;
+			container.dataList 			= voList;
+			return container;
+		}
+		catch(ServiceException exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= exc.getErrorCodeEnum().getCode();
+			container.meta.error 		= exc.getErrorCodeEnum().getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+		catch(Exception exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getCode();
+			container.meta.error 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+	}
+	
+	@POST
+	@Path("/components")
+	@Produces( MediaType.APPLICATION_JSON )
+	@ApiOperation(value = "Create Component",response=SystemComponentVo.class)
+	public BaseContainerVo createComponent(@ApiParam(value="name",required=true) @FormParam("name") String name){
+		ComponentContainerVo container = new ComponentContainerVo();
+		try{
+			ComponentVo vo 	= labService.createComponent(name, "", "Super Admin");
+			container.meta.code 	= Constants.SUCCESS;
+			container.data 			= vo;
+			return container;
+		}
+		catch(ServiceException exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= exc.getErrorCodeEnum().getCode();
+			container.meta.error 		= exc.getErrorCodeEnum().getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+		catch(Exception exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getCode();
+			container.meta.error 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+	}
+	
+	@GET
+	@Path("/components")
+	@Produces( MediaType.APPLICATION_JSON )
+	@ApiOperation(value = "Get All Components",response=ReleaseCupContainerVo.class)
+	public BaseContainerVo getAllComponent(){
+ 
+		ComponentContainerVo container = new ComponentContainerVo();
+		try{
+			List<ComponentVo> voList 	= labService.getAllComponentsCreatedByAdmin();
+			container.meta.code 		= Constants.SUCCESS;
+			container.dataList 			= voList;
+			return container;
+		}
+		catch(ServiceException exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= exc.getErrorCodeEnum().getCode();
+			container.meta.error 		= exc.getErrorCodeEnum().getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+		catch(Exception exc){
+			exc.printStackTrace(System.err);
+			container.meta.code 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getCode();
+			container.meta.error 		= ErrorCodeEnum.INTERNAL_SERVER_ERROR.getMessage();
+			container.meta.details	= ExceptionUtils.getRootCauseMessage(exc).toString();
+			return container;
+		}
+	}
+	
+	
 	
 	public void setUserService(UserService userService) {
 		this.userService = userService;

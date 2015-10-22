@@ -39,7 +39,7 @@ public class BaseService {
 			throw new ServiceException(e.getMessage(), e, ErrorCodeEnum.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	
 	public void setDao(DAO dao) {
 		this.dao = dao;
 	}

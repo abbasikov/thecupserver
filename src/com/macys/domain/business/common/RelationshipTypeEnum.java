@@ -5,7 +5,8 @@ public enum RelationshipTypeEnum {
 	LAB_USER("Lab_User",0),
 	LAB_SYSTEMCOMPONENT("Lab_SystemComponent",1),
 	RELEASECUP_IPM("RELEASECUP_IPM",2),
-	USER_ROLE("USER_ROLE",3);
+	USER_ROLE("USER_ROLE",3),
+	LAB_COMPONENT("LAB_COMPONENT",4);
 	
 	String relationshipName;
 	int code;
