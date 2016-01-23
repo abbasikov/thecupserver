@@ -241,6 +241,21 @@ public class DAOImpl extends BaseDAOImpl implements DAO {
 		return getBusinessObjectByUuid(uuid);
 		
 	}
+	
+	@Override
+	public BusinessObject updateBusinessObjectNameByUuid(String uuid, String updatedName) throws ServiceException{
+		
+		BusinessObject businessObj =  getBusinessObjectByUuid(uuid);
+		
+		//Return empty list
+		if(businessObj == null){
+			return null;
+		}
+		
+		jdbcTemplateRepostiory.updateBusinessObjectNameByUuid(uuid, businessObj.getType(), updatedName);
+		
+		return getBusinessObjectByUuid(uuid);
+	}
 
 	@Override
 	public List<Relationship> findChildren(String parentUuid) {

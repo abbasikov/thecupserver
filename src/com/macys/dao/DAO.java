@@ -49,4 +49,7 @@ public interface DAO {
 	public void deleteRelationShip(String pUuid, String cUuid, RelationshipTypeEnum relationshipType) throws ServiceException;
 	
 	public void deleteRelationShipByChildUuid(String cUuid, RelationshipTypeEnum relationshipType) throws ServiceException;
+
+	public abstract BusinessObject updateBusinessObjectNameByUuid(String uuid,
+			String updatedName) throws ServiceException;
 }

@@ -29,6 +29,15 @@ public class BaseService {
 			if(businessObject == null)
 				throw new ServiceException("Business object not found", ErrorCodeEnum.BUSINESS_OBJECT_NOT_FOUND);
 			
+			//find if 'name' key exists, update in business object
+			for(int i=0; i<namesArray.length; i++){
+				if(namesArray[i].contains("name")){
+					String updatedName = valuesArray[i];
+					businessObject = dao.updateBusinessObjectNameByUuid(uuid, updatedName);
+					break;
+				}
+			}
+			
 			return businessObject;
 		
 		}

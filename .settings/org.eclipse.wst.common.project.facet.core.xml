@@ -2,7 +2,7 @@
 <faceted-project>
   <installed facet="java" version="1.7"/>
   <installed facet="wst.jsdt.web" version="1.0"/>
-  <installed facet="jst.web" version="3.0"/>
   <installed facet="jst.jaxrs" version="2.0"/>
   <installed facet="maven" version="1.0"/>
+  <installed facet="jst.web" version="3.1"/>
 </faceted-project>
