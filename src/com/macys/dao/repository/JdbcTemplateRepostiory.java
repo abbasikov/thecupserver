@@ -83,6 +83,24 @@ public class JdbcTemplateRepostiory extends JdbcDaoSupport {
 		
 	}
 	
+	@Transactional
+	public int updateBusinessObjectNameByUuid(String uuid, String type, String updatedName){
+		
+		try{
+			String sql = "update dbobject set name=? where type=? and uuid = ?";
+			
+			int rowsEffected =  this.getJdbcTemplate().update(sql, new Object[]{updatedName, type, uuid});
+			
+			return rowsEffected;
+		}
+		catch(Exception exc){
+			// ignore exception
+		}
+		
+		return -1;
+		
+	}
+	
 	public List<String> findChildUuids(String parentUuid, BusinessObjectTypeEnum[] objectTypeEnums) {
 		
 		if(objectTypeEnums == null) {
