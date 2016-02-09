@@ -15,6 +15,16 @@ public class ServiceUtils {
 		
 	}
 	
+	public static void verifyUserName(String value) throws ServiceException{
+		if(StringUtils.isBlank(value)) {
+			throw new ServiceException("Username must not be blank", ErrorCodeEnum.BLANK_FIELD);
+		}
+		
+		if(StringUtils.containsWhitespace(value)){
+			throw new ServiceException("Username cannot contains whitespace.", ErrorCodeEnum.INVALID_USERNAME);
+		}
+	}
+	
 	
 
 }

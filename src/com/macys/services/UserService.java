@@ -75,16 +75,19 @@ public class UserService extends BaseService{
 		ServiceUtils.verifyNotBlank(password, 		"password");
 		ServiceUtils.verifyNotBlank(firstName, 		"firstName");
 		
+		String trimmedUserName = userName.trim();
+		ServiceUtils.verifyUserName(trimmedUserName);
+		
 		//check if a user with this username already exists
-		List<String> userUuids = dao.findUuidsByMetadata(BusinessObjectTypeEnum.USER, "userName", userName);
+		List<String> userUuids = dao.findUuidsByMetadata(BusinessObjectTypeEnum.USER, "userName", trimmedUserName);
 		
 		//if a user with this username already exists, then dont create a new one
 		if(userUuids.size() > 0) {
-			throw new ServiceException("Username:"+userName+" already exists.",ErrorCodeEnum.USERNAME_ALREADY_EXISTS);
+			throw new ServiceException("Username:"+trimmedUserName+" already exists.",ErrorCodeEnum.USERNAME_ALREADY_EXISTS);
 		}
 		
-		User user = (User)dao.emptyBusinessObject(BusinessObjectTypeEnum.USER, userName, createdBy);
-		user.setUserName(userName);
+		User user = (User)dao.emptyBusinessObject(BusinessObjectTypeEnum.USER, trimmedUserName, createdBy);
+		user.setUserName(trimmedUserName);
 		user.setPassword(EncryptionUtils.encryptPassword( password ));
 		user.setFirstName(firstName);
 		user.setLastName(lastName);

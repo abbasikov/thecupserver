@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
 import com.macys.utils.JsonUtils;
+import com.macys.utils.ServiceUtils;
 import com.macys.valuesobjects.MatrixVo;
 
 public class Test {
@@ -64,6 +65,13 @@ public class Test {
 		List<Object> fff = (List<Object>)m.get("SmartPrompt");
 		Map<String, String> hh = (Map<String, String>)fff.get(0);
 		System.out.println(hh);
+		
+		try{
+			ServiceUtils.verifyUserName("helloworld ");
+		}
+		catch(Exception exc){
+			exc.printStackTrace(System.err);
+		}
 	}
 
 	@Override
