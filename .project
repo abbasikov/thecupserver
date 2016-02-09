@@ -34,7 +34,7 @@
 			<name>com.genuitec.eclipse.ast.deploy.core.DeploymentBuilder</name>
 			<arguments>
 			</arguments>
-		</buildCommand>
+		</buildCommand>		
 		<buildCommand>
 			<name>com.genuitec.eclipse.springframework.springbuilder</name>
 			<arguments>
